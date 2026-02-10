@@ -30,6 +30,7 @@ interface Carrier {
 ```
 
 This allows new carriers to plug in seamlessly. Adding FedEx requires only:
+
 1. A new `src/carriers/fedex/` directory
 2. Implementation of the `Carrier` interface
 3. Authentication and request/response mapping
@@ -163,6 +164,7 @@ const rates = await rateService.getRate({
 - **Service Layer**: High-level business logic (rate shopping, orchestration)
 
 This separation ensures that:
+
 - New carriers don't affect domain logic
 - Domain types never leak to the caller (always normalized)
 - Carriers are testable in isolation
@@ -170,6 +172,7 @@ This separation ensures that:
 ### 2. OAuth Token Management
 
 Tokens are cached in memory with automatic refresh:
+
 - Tokens are reused until expiry
 - Refresh happens `TOKEN_REFRESH_BUFFER` seconds before expiry (default 60s)
 - Transparent to the caller—no manual token management needed
@@ -178,6 +181,7 @@ Tokens are cached in memory with automatic refresh:
 ### 3. Validation First
 
 Input is validated **before** making API calls using Zod schemas:
+
 - Fails fast with clear error messages
 - Prevents invalid requests from reaching the carrier
 - Type-safe parsing
@@ -185,6 +189,7 @@ Input is validated **before** making API calls using Zod schemas:
 ### 4. Error Handling
 
 Structured error classes hierarchy:
+
 - `CarrierError` (base): message, code, original cause
 - `ValidationError`: Input validation failures
 - `AuthError`: OAuth/authentication failures
@@ -196,6 +201,7 @@ All errors include the original cause for debugging.
 ### 5. Extensibility
 
 Adding a new carrier (e.g., FedEx) requires only:
+
 1. Implement the `Carrier` interface
 2. Implement auth (OAuth, API key, etc.)
 3. Implement HTTP client
@@ -203,6 +209,7 @@ Adding a new carrier (e.g., FedEx) requires only:
 5. No changes to domain, service, or config layers
 
 Adding a new operation (e.g., label purchase, tracking) requires:
+
 1. Add a method to the `Carrier` interface
 2. Implement in each carrier
 3. Optionally add service layer methods
@@ -226,6 +233,7 @@ The `Carrier` interface ensures contract-based design. New carriers must impleme
 ### Why Separate Mapper?
 
 Keeps the carrier implementation clean:
+
 - Mapper handles all UPS API quirks
 - Easy to update if UPS API changes
 - Easy to test in isolation
@@ -262,10 +270,10 @@ class RateService {
 
 ```typescript
 interface RateRequest {
-  origin: Address;        // Shipper address
-  destination: Address;   // Recipient address
-  packages: Package[];    // Array of packages
-  serviceCode?: string;   // Optional: filter to specific service
+  origin: Address; // Shipper address
+  destination: Address; // Recipient address
+  packages: Package[]; // Array of packages
+  serviceCode?: string; // Optional: filter to specific service
 }
 ```
 
@@ -273,8 +281,8 @@ interface RateRequest {
 
 ```typescript
 interface RateResponse {
-  carrier: string;           // e.g., "UPS"
-  quotes: RateQuote[];       // Available service options
+  carrier: string; // e.g., "UPS"
+  quotes: RateQuote[]; // Available service options
   requestedAt: Date;
   expiresAt?: Date;
 }
@@ -284,9 +292,9 @@ interface RateResponse {
 
 ```typescript
 interface RateQuote {
-  serviceCode: string;    // e.g., "03" (UPS Ground)
-  serviceName: string;    // e.g., "UPS Ground"
-  cost: RateCost;         // Cost breakdown
+  serviceCode: string; // e.g., "03" (UPS Ground)
+  serviceName: string; // e.g., "UPS Ground"
+  cost: RateCost; // Cost breakdown
   estimatedDays?: number; // Days to delivery
   warnings?: string[];
 }
@@ -366,14 +374,3 @@ bun test --coverage
 - **dotenv**: Environment variable loading
 - **vitest**: Fast unit testing framework (optional, for development)
 - **@types/node**: TypeScript types for Node.js APIs
-
-## License
-
-MIT
-
-## Support
-
-For issues, feature requests, or questions:
-1. Check the GitHub issues
-2. Review the design decisions in this README
-3. Look at the test files for usage examples
